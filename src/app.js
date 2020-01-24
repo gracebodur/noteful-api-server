@@ -5,6 +5,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const { NODE_ENV } = require("./config");
 const FoldersRouter = require("./folders/FoldersRouter");
+const NotesRouter = require('./notes/NotesRouter')
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(morgan(morganOption));
 app.use(helmet());
 app.use(cors());
 app.use(FoldersRouter);
+app.use(NotesRouter)
 
 app.use(function errorHandler(error, req, res, next) {
   let response;

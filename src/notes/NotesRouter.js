@@ -1,6 +1,6 @@
 const path = require('path')
 const express = require('express')
-const NotesService = require('./notes-service')
+const NotesService = require('./NotesService')
 
 const jsonParser = express.json()
 const notesRouter = express.Router()
@@ -16,9 +16,8 @@ notesRouter
         .catch(next)
     })
     .post(jsonParser, (req, res, next) => {
-        const id = uuid()
-        const { name, folderId, content } = req.body
-        const newNote = { id, name, folderId, content }
+        const { note_name, folderId, content } = req.body
+        const newNote = { note_name, folderId, content }
 
         for (const [key, value] of Object.entries(newNote)) {
             if (value == null) {
