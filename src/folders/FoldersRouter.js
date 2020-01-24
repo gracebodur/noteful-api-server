@@ -58,10 +58,10 @@ FoldersRouter.route("/folders/:folder_id")
       .catch(next);
   })
   .get((req, res, next) => {
-    res.json(serializefolder(res.folder));
+    res.json(serializeFolder(res.folder));
   })
   .delete((req, res, next) => {
-    FoldersService.deletefolder(req.app.get("db"), req.params.folder_id)
+    FoldersService.deleteFolder(req.app.get("db"), req.params.folder_id)
       .then(numRowsAffected => {
         res.status(204).end();
       })

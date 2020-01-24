@@ -1,10 +1,10 @@
 const FoldersService = {
   getAllFolders(knex) {
-    return knex.select("*").from("noteful-api");
+    return knex.select("*").from("folders");
   },
   getById(knex, id) {
     return knex
-      .from("noteful-api")
+      .from("folders")
       .select("*")
       .where("id", id)
       .first();
@@ -12,19 +12,19 @@ const FoldersService = {
   insertFolder(knex, newFolder) {
     return knex
       .insert(newFolder)
-      .into("noteful-api")
+      .into("folders")
       .returning("*")
       .then(rows => {
         return rows[0];
       });
   },
   deleteFolder(knex, id) {
-    return knex("noteful-api")
+    return knex("folders")
       .where({ id })
       .delete();
   },
   updateFolder(knex, id, newFolderFields) {
-    return knex("noteful-api")
+    return knex("folders")
       .where({ id })
       .update(newFolderFields);
   }
