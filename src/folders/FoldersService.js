@@ -9,7 +9,7 @@ const FoldersService = {
       .where("id", id)
       .first();
   },
-  insertfolder(knex, newFolder) {
+  insertFolder(knex, newFolder) {
     return knex
       .insert(newFolder)
       .into("noteful-api")
@@ -18,12 +18,12 @@ const FoldersService = {
         return rows[0];
       });
   },
-  deletefolder(knex, id) {
+  deleteFolder(knex, id) {
     return knex("noteful-api")
       .where({ id })
       .delete();
   },
-  updatefolder(knex, id, newFolderFields) {
+  updateFolder(knex, id, newFolderFields) {
     return knex("noteful-api")
       .where({ id })
       .update(newFolderFields);
