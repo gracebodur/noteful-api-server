@@ -1,11 +1,18 @@
 const path = require("path");
 const express = require("express");
+const xss = require("xss");
 const NotesService = require("./NotesService");
 
 const jsonParser = express.json();
 const NotesRouter = express.Router();
 
-NotesRouter.route("/notes")
+const serializeNote = note => ({
+  note_name: xss(note.note_name),
+  content: xss(note.content)
+});
+
+
+NotesRouter.route("/")
   .get((req, res, next) => {
     const knexInstance = req.app.get("db");
     NotesService.getAllNotes(knexInstance)
@@ -37,19 +44,21 @@ NotesRouter.route("/notes")
   });
 
 NotesRouter.route("/notes/:id")
-  .get((req, res) => {
-    const { id } = req.params;
-    const note = notes.find(n => n.id == id);
-    NotesService.getNoteById(req.app.get("db"), id)
-      .then(note => {
-        if (!note) {
-          return res.status(404).json({
-            error: { message: `Note doesn't exist` }
-          });
-        }
-        res.json(note);
-      })
-      .catch(next);
+.all((req, res, next) => {
+  NotesService.getById(req.app.get("db"), req.params.id)
+    .then(note => {
+      if (!note) {
+        return res.status(404).json({
+          error: { message: `Note doesn't exist` }
+        });
+      }
+      res.note = note;
+      next();
+    })
+    .catch(next);
+  })
+  .get((req, res, next) => {
+      res.json(serializeNote(res.note));
   })
   .delete((req, res, next) => {
     NotesService.deleteNote(req.app.get("db"), req.params.id)
@@ -59,14 +68,14 @@ NotesRouter.route("/notes/:id")
       .catch(next);
   })
   .patch(jsonParser, (req, res, next) => {
-    const { note_name } = req.body;
-    const noteToUpdate = { note_name };
+    const { note_name, content } = req.body;
+    const noteToUpdate = { note_name, content };
 
     const numberOfValues = Object.values(noteToUpdate).filter(Boolean).length;
     if (numberOfValues === 0) {
       return res.status(400).json({
         error: {
-          message: `Request body must contain a note name`
+          message: `Request body must contain a note name and a `
         }
       });
     }

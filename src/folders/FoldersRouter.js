@@ -10,7 +10,7 @@ const serializeFolder = folder => ({
   folder_name: xss(folder.folder_name)
 });
 
-FoldersRouter.route("/folders")
+FoldersRouter.route("/")
   .get((req, res, next) => {
     const knexInstance = req.app.get("db");
     FoldersService.getAllFolders(knexInstance)
