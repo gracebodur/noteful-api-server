@@ -7,17 +7,24 @@ const jsonParser = express.json();
 const NotesRouter = express.Router();
 
 const serializeNote = note => ({
+  noteid: note.noteid,
   note_name: xss(note.note_name),
+  modified: note.modified,
+  folderid:Number(note.folderid),
   content: xss(note.content)
 });
-
 
 NotesRouter.route("/")
   .get((req, res, next) => {
     const knexInstance = req.app.get("db");
     NotesService.getAllNotes(knexInstance)
       .then(notes => {
-        res.json(notes);
+        if(!notes) {
+          return res.status(400).json({
+            error: { message: `Note doesn't exist`}
+          })
+        }
+        res.json(notes.map(serializeNote));
       })
       .catch(next);
   })
@@ -37,15 +44,15 @@ NotesRouter.route("/")
       .then(note => {
         res
           .status(201)
-          .location(path.posix.join(req.originalUrl, `${newNote.id}`))
-          .json(newNote);
+          .location(path.posix.join(req.originalUrl, `${newNote.noteid}`))
+          .json(serialize(newNote));
       })
       .catch(next);
   });
 
-NotesRouter.route("/notes/:id")
+NotesRouter.route("/:noteid")
 .all((req, res, next) => {
-  NotesService.getById(req.app.get("db"), req.params.id)
+  NotesService.getById(req.app.get("db"), req.params.noteid)
     .then(note => {
       if (!note) {
         return res.status(404).json({
@@ -61,25 +68,28 @@ NotesRouter.route("/notes/:id")
       res.json(serializeNote(res.note));
   })
   .delete((req, res, next) => {
-    NotesService.deleteNote(req.app.get("db"), req.params.id)
+    NotesService.deleteNote(req.app.get("db"), req.params.noteid)
       .then(numRowsAffected => {
         res.status(204).end();
       })
       .catch(next);
   })
   .patch(jsonParser, (req, res, next) => {
-    const { note_name, content } = req.body;
-    const noteToUpdate = { note_name, content };
+    const { note_name, folderid, content } = req.body;
+    const noteToUpdate = { note_name, folderid, content };
 
     const numberOfValues = Object.values(noteToUpdate).filter(Boolean).length;
     if (numberOfValues === 0) {
       return res.status(400).json({
         error: {
-          message: `Request body must contain a note name and a `
+          message: `Request body must contain a 'note name', 'folderid' or 'content' `
         }
       });
     }
-    NotesService.updateNote(req.app.get("db"), req.params.id, noteToUpdate)
+
+    noteToUpdate.modified = new Date();
+    
+    NotesService.updateNote(req.app.get("db"), req.params.noteid, noteToUpdate)
       .then(numRowsAffected => {
         res.status(204).end();
       })

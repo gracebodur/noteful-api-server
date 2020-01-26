@@ -7,6 +7,7 @@ const FoldersRouter = express.Router();
 const jsonParser = express.json();
 
 const serializeFolder = folder => ({
+  folderid: folder.folderid,
   folder_name: xss(folder.folder_name)
 });
 
@@ -22,8 +23,6 @@ FoldersRouter.route("/")
   .post(jsonParser, (req, res, next) => {
     const { folder_name } = req.body;
     const newFolder = { folder_name };
-
-    // text, article_id, user_id, date_foldered
 
     for (const [key, value] of Object.entries(newFolder))
       if (value == null)
@@ -43,13 +42,13 @@ FoldersRouter.route("/")
       .catch(next);
   });
 
-FoldersRouter.route("/folders/:folder_id")
+FoldersRouter.route("/:folderid")
   .all((req, res, next) => {
-    FoldersService.getById(req.app.get("db"), req.params.folder_id)
+    FoldersService.getById(req.app.get("db"), req.params.folderid)
       .then(folder => {
         if (!folder) {
           return res.status(404).json({
-            error: { message: `folder doesn't exist` }
+            error: { message: `Folder doesn't exist` }
           });
         }
         res.folder = folder;
@@ -61,7 +60,7 @@ FoldersRouter.route("/folders/:folder_id")
     res.json(serializeFolder(res.folder));
   })
   .delete((req, res, next) => {
-    FoldersService.deleteFolder(req.app.get("db"), req.params.folder_id)
+    FoldersService.deleteFolder(req.app.get("db"), req.params.folderid)
       .then(numRowsAffected => {
         res.status(204).end();
       })
@@ -81,7 +80,7 @@ FoldersRouter.route("/folders/:folder_id")
 
     FoldersService.updateFolder(
       req.app.get("db"),
-      req.params.folder_id,
+      req.params.folderid,
       folderToUpdate
     )
       .then(numRowsAffected => {

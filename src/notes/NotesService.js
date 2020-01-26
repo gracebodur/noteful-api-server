@@ -6,7 +6,7 @@ const NotesService = {
     return knex
       .from("notes")
       .select("*")
-      .where("id", id)
+      .where("noteid", id)
       .first();
   },
   insertNote(knex, newNote) {
@@ -20,12 +20,12 @@ const NotesService = {
   },
   deleteNote(knex, id) {
     return knex("notes")
-      .where({ id })
+      .where('noteid', id )
       .delete();
   },
   updateNote(knex, id, newNoteFields) {
     return knex("notes")
-      .where({ id })
+      .where('noteid', id)
       .update(newNoteFields);
   }
 };
