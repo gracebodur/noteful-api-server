@@ -42,13 +42,13 @@ FoldersRouter.route("/")
       .then(folder => {
         res
           .status(201)
-          .location(path.posix.join(req.originalUrl, `/${folder.id}`))
+          .location(path.posix.join(req.originalUrl, `/${folder.folderid}`))
           .json(serializeFolder(folder));
       })
       .catch(next);
   });
 
-FoldersRouter.route("/:folderid")
+FoldersRouter.route('/:folderid')
   .all((req, res, next) => {
     const knexInstance = req.app.get('db');
     FoldersService.getById(knexInstance, req.params.folderid)

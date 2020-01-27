@@ -42,7 +42,7 @@ NotesRouter.route("/")
 
     const knexInstance = req.app.get('db');
     NotesService.insertNote(knexInstance, newNote)
-      .then(note => {
+      .then(newNote => {
         res
           .status(201)
           .location(path.posix.join(req.originalUrl + `/${newNote.noteid}`))
@@ -51,12 +51,13 @@ NotesRouter.route("/")
       .catch(next);
   });
 
-NotesRouter.route("/:noteid")
+NotesRouter.route('/:noteid')
 .all((req, res, next) => {
 
   const knexInstance = req.app.get('db');
   NotesService.getById(knexInstance, req.params.noteid)
     .then(note => {
+      console.log('note', note)
       if (!note) {
         return res.status(404).json({
           error: { message: `Note doesn't exist` }
@@ -64,6 +65,7 @@ NotesRouter.route("/:noteid")
       }
       res.note = note;
       next();
+      // res.json(serializeNote(note))
     })
     .catch(next);
   })
