@@ -15,7 +15,11 @@ app.use(morgan(morganOption));
 app.use(helmet());
 app.use(cors());
 app.use('/api/folders', FoldersRouter);
-app.use('/api/notes', NotesRouter)
+app.use('/api/notes', NotesRouter);
+
+app.get('/', (req, res) => {
+  res.json({message: 'Hello, world!'});
+});
 
 app.use(function errorHandler(error, req, res, next) {
   let response;

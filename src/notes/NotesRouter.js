@@ -40,11 +40,12 @@ NotesRouter.route("/")
       }
     }
 
-    NotesService.insertNote(req.app.get("db"), newNote)
+    const knexInstance = req.app.get('db');
+    NotesService.insertNote(knexInstance, newNote)
       .then(note => {
         res
           .status(201)
-          .location(path.posix.join(req.originalUrl, `${newNote.noteid}`))
+          .location(path.posix.join(req.originalUrl + `/${newNote.noteid}`))
           .json(serialize(newNote));
       })
       .catch(next);
@@ -52,7 +53,9 @@ NotesRouter.route("/")
 
 NotesRouter.route("/:noteid")
 .all((req, res, next) => {
-  NotesService.getById(req.app.get("db"), req.params.noteid)
+
+  const knexInstance = req.app.get('db');
+  NotesService.getById(knexInstance, req.params.noteid)
     .then(note => {
       if (!note) {
         return res.status(404).json({
@@ -68,9 +71,10 @@ NotesRouter.route("/:noteid")
       res.json(serializeNote(res.note));
   })
   .delete((req, res, next) => {
-    NotesService.deleteNote(req.app.get("db"), req.params.noteid)
-      .then(numRowsAffected => {
-        res.status(204).end();
+    const knexInstance = req.app.get('db');
+    NotesService.deleteNote(knexInstance, req.params.noteid)
+      .then(notes => {
+        res.status(204).end(notes);
       })
       .catch(next);
   })
@@ -88,9 +92,10 @@ NotesRouter.route("/:noteid")
     }
 
     noteToUpdate.modified = new Date();
-    
-    NotesService.updateNote(req.app.get("db"), req.params.noteid, noteToUpdate)
-      .then(numRowsAffected => {
+
+    const knexInstance = req.app.get('db');
+    NotesService.updateNote(knexInstance, req.params.noteid, noteToUpdate)
+      .then(() => {
         res.status(204).end();
       })
       .catch(next);

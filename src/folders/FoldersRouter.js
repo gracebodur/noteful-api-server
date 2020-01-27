@@ -16,6 +16,11 @@ FoldersRouter.route("/")
     const knexInstance = req.app.get("db");
     FoldersService.getAllFolders(knexInstance)
       .then(folders => {
+        if(!folders) {
+          return res.status(400).json({
+            error: { message: `Folder doesn't exist` }
+          })
+        }
         res.json(folders.map(serializeFolder));
       })
       .catch(next);
@@ -32,7 +37,8 @@ FoldersRouter.route("/")
 
     newFolder.folder_name = folder_name;
 
-    FoldersService.insertFolder(req.app.get("db"), newFolder)
+    const knexInstance = req.app.get('db');
+    FoldersService.insertFolder(knexInstance, newFolder)
       .then(folder => {
         res
           .status(201)
@@ -44,7 +50,8 @@ FoldersRouter.route("/")
 
 FoldersRouter.route("/:folderid")
   .all((req, res, next) => {
-    FoldersService.getById(req.app.get("db"), req.params.folderid)
+    const knexInstance = req.app.get('db');
+    FoldersService.getById(knexInstance, req.params.folderid)
       .then(folder => {
         if (!folder) {
           return res.status(404).json({
@@ -60,9 +67,10 @@ FoldersRouter.route("/:folderid")
     res.json(serializeFolder(res.folder));
   })
   .delete((req, res, next) => {
-    FoldersService.deleteFolder(req.app.get("db"), req.params.folderid)
-      .then(numRowsAffected => {
-        res.status(204).end();
+    const knexInstance = req.app.get('db');
+    FoldersService.deleteFolder(knexInstance, req.params.folderid)
+      .then(folders => {
+        res.status(204).end(folders);
       })
       .catch(next);
   })
@@ -78,12 +86,13 @@ FoldersRouter.route("/:folderid")
         }
       });
 
+    const knexInstance = req.app.get('db');
     FoldersService.updateFolder(
-      req.app.get("db"),
+      knexInstance,
       req.params.folderid,
       folderToUpdate
     )
-      .then(numRowsAffected => {
+      .then(() => {
         res.status(204).end();
       })
       .catch(next);
