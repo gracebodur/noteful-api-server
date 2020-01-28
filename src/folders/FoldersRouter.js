@@ -29,20 +29,27 @@ FoldersRouter.route("/")
     const { folder_name } = req.body;
     const newFolder = { folder_name };
 
-    for (const [key, value] of Object.entries(newFolder))
-      if (value == null)
-        return res.status(400).json({
-          error: { message: `Missing '${key}' in request body` }
-        });
+    if(!folder_name){
+      return res.status(400).json({
+        error: { message: `Missing 'folder_name' in request body`}
+      });
+    }
 
-    newFolder.folder_name = folder_name;
+
+    // for (const [key, value] of Object.entries(newFolder))
+    //   if (value == null)
+    //     return res.status(400).json({
+    //       error: { message: `Missing '${key}' in request body` }
+    //     });
+
+    // newFolder.folder_name = folder_name;
 
     const knexInstance = req.app.get('db');
     FoldersService.insertFolder(knexInstance, newFolder)
       .then(folder => {
         res
           .status(201)
-          .location(path.posix.join(req.originalUrl, `/${folder.folderid}`))
+          .location(path.posix.join(req.originalUrl + `/${folder.folderid}`))
           .json(serializeFolder(folder));
       })
       .catch(next);
@@ -70,7 +77,7 @@ FoldersRouter.route('/:folderid')
     const knexInstance = req.app.get('db');
     FoldersService.deleteFolder(knexInstance, req.params.folderid)
       .then(folders => {
-        res.status(204).end(folders);
+        res.status(204).json(folders);
       })
       .catch(next);
   })
@@ -78,13 +85,20 @@ FoldersRouter.route('/:folderid')
     const { folder_name } = req.body;
     const folderToUpdate = { folder_name };
 
-    const numberOfValues = Object.values(folderToUpdate).filter(Boolean).length;
-    if (numberOfValues === 0)
+    // const numberOfValues = Object.values(folderToUpdate).filter(Boolean).length;
+    // if (numberOfValues === 0)
+    //   return res.status(400).json({
+    //     error: {
+    //       message: `Request body must contain folder name`
+    //     }
+    //   });
+
+    if (!folder_name) {
       return res.status(400).json({
-        error: {
-          message: `Request body must contain folder name`
-        }
+          error: { message: `Missing key 'folder_name' in request body`}
       });
+    }
+    
 
     const knexInstance = req.app.get('db');
     FoldersService.updateFolder(
