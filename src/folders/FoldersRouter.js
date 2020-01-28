@@ -35,14 +35,7 @@ FoldersRouter.route("/")
       });
     }
 
-
-    // for (const [key, value] of Object.entries(newFolder))
-    //   if (value == null)
-    //     return res.status(400).json({
-    //       error: { message: `Missing '${key}' in request body` }
-    //     });
-
-    // newFolder.folder_name = folder_name;
+    newFolder.folder_name = folder_name;
 
     const knexInstance = req.app.get('db');
     FoldersService.insertFolder(knexInstance, newFolder)

@@ -2,13 +2,6 @@ const FoldersService = {
   getAllFolders(knex) {
     return knex.select("*").from("folders");
   },
-  getById(knex, id) {
-    return knex
-      .from("folders")
-      .select("*")
-      .where("folderid", id)
-      .first();
-  },
   insertFolder(knex, newFolder) {
     return knex
       .insert(newFolder)
@@ -17,6 +10,13 @@ const FoldersService = {
       .then(rows => {
         return rows[0];
       });
+  },
+  getById(knex, id) {
+    return knex
+      .from("folders")
+      .select("*")
+      .where("folderid", id)
+      .first();
   },
   deleteFolder(knex, id) {
     return knex("folders")

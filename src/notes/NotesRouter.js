@@ -10,7 +10,7 @@ const serializeNote = note => ({
   noteid: note.noteid,
   note_name: xss(note.note_name),
   modified: note.modified,
-  folderid:Number(note.folderid),
+  folderid: Number(note.folderid),
   content: xss(note.content)
 });
 
@@ -29,8 +29,8 @@ NotesRouter.route("/")
       .catch(next);
   })
   .post(jsonParser, (req, res, next) => {
-    const { note_name, folderid, content } = req.body;
-    const newNote = { note_name, folderid, content };
+    const { note_name, folderid , content } = req.body;
+    const newNote = { note_name, folderid , content };
 
     for (const [key, value] of Object.entries(newNote)) {
       if (value == null) {
@@ -44,9 +44,9 @@ NotesRouter.route("/")
     NotesService.insertNote(knexInstance, newNote)
       .then(note => {
         res
-          .status(201)
-          .location(path.posix.join(req.originalUrl + `/${note.noteid}`))
-          .json(serialize(note));
+        .status(201)
+        .location(path.posix.join(req.originalUrl + `/${note.noteid}`))
+        .json(serializeNote(note));
       })
       .catch(next);
   });
@@ -75,7 +75,7 @@ NotesRouter.route('/:noteid')
     const knexInstance = req.app.get('db');
     NotesService.deleteNote(knexInstance, req.params.noteid)
       .then(notes => {
-        res.status(204).end(notes);
+        res.status(204).json(notes);
       })
       .catch(next);
   })
@@ -87,7 +87,7 @@ NotesRouter.route('/:noteid')
     if (numberOfValues === 0) {
       return res.status(400).json({
         error: {
-          message: `Request body must contain a 'note name', 'folderid' or 'content' `
+          message: `Request body must contain a 'note_name', 'folderid' or 'content' `
         }
       });
     }
